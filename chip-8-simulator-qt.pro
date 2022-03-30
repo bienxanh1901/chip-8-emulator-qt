@@ -6,6 +6,7 @@ QT += quick
 
 SOURCES += \
         chip8.cpp \
+        chip8model.cpp \
         main.cpp \
         opcode.cpp
 
@@ -24,6 +25,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     chip8.h \
+    chip8model.h \
     common.h \
     constants.h \
     opcode.h
