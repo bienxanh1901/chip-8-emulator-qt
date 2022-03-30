@@ -34,7 +34,7 @@ private:
     void loadROM(QString &rom);
     quint16 fetch();
     Opcode decode(quint16 &bytes);
-    void execute(Opcode &opcode);
+    void execute(Opcode &code);
 
     // Registors handler
     void clearRegs();
@@ -44,7 +44,7 @@ private:
     void clearDisplay();
 
     // Opcode handler
-    void executeMathOp(Opcode &opcode);
+    void executeMathOp(Opcode &code);
 
 private:
     // RAM with 4096 bytes
