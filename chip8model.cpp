@@ -3,9 +3,13 @@
 #include "constants.h"
 
 Chip8Model::Chip8Model(QObject *parent)
-    : QAbstractItemModel(parent)
+    : QAbstractItemModel(parent),
+    ram(RAM_AMOUNT, 0x00),
+    pc(PROGRAM_START_ADDRESS),
+    delayTimer(),
+    soundTimer()
 {
-
+    this->init();
 }
 
 int Chip8Model::rowCount(const QModelIndex &parent) const
@@ -35,6 +39,8 @@ void Chip8Model::init()
     this->loadFont();
 
     // Init timer
+    connect(this->delayTimer, &QTimer::timeout, this, &onDelayTimerExpried);
+    connect(this->soundTimer, &QTimer::timeout, this, &onSoundTimerExpried);
 }
 
 void Chip8Model::loadFont()
@@ -55,16 +61,28 @@ void Chip8Model::nextOpcode()
     this->pc+=2;
 }
 
-void Chip8Model::run(QString &rom)
+void clear()
 {
     // Stop timers
-
+    this->delayTimer.stop();
+    this->soundTimer.stop();
+    this->delayTimerValue = 0;
+    this->soundTimerValue = 0;
     // clear current Display
     this->clearDisplay();
 
     // Set PC to start address
     this->setPC(PROGRAM_START_ADDRESS);
 
+    // clear RAM
+    this->ram.replace(PROGRAM_START_ADDRESS, PROGRAM_MAX_SIZE, QByteArray(PROGRAM_MAX_SIZE, 0x00));
+}
+
+void Chip8Model::run(QString &rom)
+{
+
+    // Clear
+    this->clear();
     // Load rom
     this->loadROM(rom);
 
@@ -80,8 +98,6 @@ void Chip8Model::loadROM(QString &rom)
         file.close();
     }
 
-    // Clear old and load new rom data from/to RAM
-    this->ram.replace(PROGRAM_START_ADDRESS, PROGRAM_MAX_SIZE, QByteArray(PROGRAM_MAX_SIZE, 0x00));
     this->ram.replace(PROGRAM_START_ADDRESS, data.size(), data);
 }
 
@@ -188,6 +204,41 @@ void Chip8Model::clearDisplay()
     }
 }
 
+void draw(quint8 x, quint8 y, quint8 n)
+{
+    // Ensure x is in range [0, 63]
+    x&=(WIDTH - 1);
+    // Ensure y is in range [0, 31]
+    y&=(HEIGHT - 1);
+
+    // Set VF to 0
+    this->regs[NUM_REGS - 1] = 0;
+
+    for (quint16 row = y; row < y + n && row < HEIGHT; row++)
+    {
+        quint8 ridx = x;
+        quint8 pixels = this->ram.at(this->memReg + row);
+        for (quint8 col = 0; col < 8 && (col + x < WIDTH); col++)
+        {
+            quint8 pixel = ((pixels >> (col + 1)) & 1);
+            if (pixel)
+            {
+                if (pixel ^ this->screenPixels[col + x][row])
+                {
+                    // incase(1 ^ 0 = 1)
+                    this->screenPixels[col + x][row] = true;
+                } else
+                {
+                    // incase (1 ^ 1 = 0)
+                    this->screenPixels[col + x][row] = false;
+                    this->regs[NUM_REGS - 1];
+                }
+            }
+        }
+    }
+
+}
+
 void Chip8Model::executeMathOp(Opcode &code)
 {
     quint8 &VX = this->regs[code.x];
@@ -233,8 +284,107 @@ void Chip8Model::executeMathOp(Opcode &code)
         VX = VY - VX;
         break;
     case VXY_MSB: // 8XYE
+        VF = VX >> 7;
         VX<<= 1;
-        VF = VX & 1; // @TODO
         break;
     }
 }
+
+void executeFOpGroup(Opcode &code)
+{
+    quint8 &VX = this->regs[code.x];
+
+    switch (code.n) {
+    case SET_DELAY_TIMER: // FX07
+        this->setDelayTimerValue(VX);
+        break;
+    case VX_WAIT_KEY_PRESSED: // FX0A
+        this->keyPressedWaiting(VX);
+        break;
+    case VX_SET_BY_DELAY_TIMER: // FX15
+        VX = this->delayTimerValue;
+        break;
+    case VX_SET_BY_SOUND_TIMER: // FX18
+        VX = this->soundTimerValue;
+        break;
+    case I_ADD_VX: // FX1E
+        this->memReg+= VX;
+        break;
+    case I_SET_BY_SPRITE_ADDR: // FX29
+        this->memReg = this->ram.indexOf(VX, FONT_START_ADDRESS);
+        break;
+    case I_STORE_BCD:// FX33
+        this->BCDStorage(VX);
+        break;
+    case REG_DUMP: // FX55
+        this->regDump(code.x);
+        break;
+    case REG_LOAD: // FX65
+        this->regLoad(code.x);
+        break;
+    }
+}
+
+void regDump(quint8 x)
+{
+    quint16 start = this->memReg;
+    for (quint8 i = 0; i < x; i++)
+    {
+        this->ram[start + i] = this->regs[i];
+    }
+}
+
+void regLoad(quint8 x)
+{
+    quint16 start = this->memReg;
+    for (quint8 i = 0; i < x; i++)
+    {
+         this->regs[i] = this->ram[start + i];
+    }
+}
+
+void BCDStorage(quint8 val)
+{
+    for (int i = 2; i >= 0; i--)
+    {
+        this->ram[this->memReg + i] = val%10;
+        val/=10;
+    }
+}
+
+void setDelayTimerValue(quint8 val)
+{
+    this->delayTimer.stop();
+    this->delayTimerValue = val;
+    this->delayTimer.start(0.1666666666667);
+}
+
+void setSoundTimerValue(quint8 val)
+{
+    this->soundTimer.stop();
+    this->soundTimerValue = val;
+    this->soundTimer.start(0.1666666666667);
+
+    // TODO enable beep
+}
+
+void onDelayTimerExpried()
+{
+    this->delayTimerValue--;
+    if (this->delayTimerValue == 0)
+    {
+        this->delayTimer.stop();
+    }
+}
+
+void onSoundTimerExpried()
+{
+    this->soundTimerValue--;
+    if (this->soundTimerValue == 0)
+    {
+        this->soundTimerValue.stop();
+        // TODO disable beep
+    }
+}
+
+

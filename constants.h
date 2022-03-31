@@ -2,7 +2,6 @@
 #define CONSTANTS_H
 
 #include <QtGlobal>
-#include <QByteArray>
 
 // Memory definition
 #define RAM_AMOUNT 0x1000
@@ -12,8 +11,8 @@
 #define PROGRAM_MAX_SIZE 0xE00
 
 // Screen definition
-#define WIDTH 32
-#define HEIGHT 64
+#define WIDTH 64
+#define HEIGHT 32
 
 // Registor
 #define NUM_REGS 16
@@ -84,7 +83,7 @@ enum InstructionTypes {
     JUMP_B = 0x0B,
     VX_RAND = 0x0C,
     DRAW_SPRITE = 0x0D,
-    KEY_OP = 0x0E,
+    E_OP = 0x0E,
     F_OP = 0x0F
 };
 

@@ -30,6 +30,7 @@ private:
     void nextOpcode();
 
     // Program running handler
+    void clear();
     void run(QString &rom);
     void loadROM(QString &rom);
     quint16 fetch();
@@ -42,9 +43,22 @@ private:
 
     // Screen handler
     void clearDisplay();
+    void draw();
 
     // Opcode handler
     void executeMathOp(Opcode &code);
+    void executeFOpGroup(Opcode &code);
+    void regDump(quint8 x);
+    void regLoad(quint8 x);
+    void BCDStorage(quint8 val);
+
+    // Timer handler
+    void setDelayTimerValue(quint8 val);
+    void setSoundTimerValue(quint8 val);
+    void onDelayTimerExpried();
+    void onSoundTimerExpried();
+
+    // Key handler
 
 private:
     // RAM with 4096 bytes
@@ -62,6 +76,11 @@ private:
     // Delay timer
     QTimer delayTimer;
     QTimer soundTimer;
+    quint8 delayTimerValue = 0;
+    quint8 SoundTimerValue = 0;
+
+    // key pressed
+    quint8 currKeyPressed = 0x00;
 };
 
 #endif // CHIP8MODEL_H
