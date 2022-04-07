@@ -6,6 +6,7 @@
 class Opcode
 {
 public:
+    Opcode();
     Opcode(quint16 &bytes);
 
     quint16 data;
@@ -14,7 +15,7 @@ public:
     quint8 y;
     quint8 n;
     quint8 nn;
-    quint8 nnn;
+    quint16 nnn;
 };
 
 #endif // OPCODE_H

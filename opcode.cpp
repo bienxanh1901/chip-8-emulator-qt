@@ -1,6 +1,11 @@
 #include "opcode.h"
 
 
+Opcode::Opcode()
+{
+
+}
+
 Opcode::Opcode(quint16 & data):
     data(data)
 {

@@ -4,19 +4,23 @@
 #include <QtGlobal>
 
 // Memory definition
-#define RAM_AMOUNT 0x1000
-#define FONT_LENGTH 0x050
-#define FONT_START_ADDRESS 0x050
-#define PROGRAM_START_ADDRESS 0x200
-#define PROGRAM_MAX_SIZE 0xE00
+const quint16 RAM_AMOUNT(0x1000);
+const quint16 FONT_LENGTH(0x050);
+const quint16 FONT_START_ADDRESS(0x050);
+const quint16 PROGRAM_START_ADDRESS(0x200);
+const quint16 PROGRAM_MAX_SIZE(0xE00);
 
 // Screen definition
-#define WIDTH 64
-#define HEIGHT 32
+const quint8 WIDTH(64);
+const quint8 HEIGHT(32);
 
-// Registor
-#define NUM_REGS 16
+// number variable registors
+const quint8 NUM_VAR_REGS(16);
 
+
+// timer
+const quint8 CLOCK_TICK(17);
+const quint8 RUNNING_SPEED(1);
 
 // Opcode instruction type definition
 /*
@@ -106,10 +110,10 @@ enum KeyOpcode {
 };
 
 enum FOpcode {
-    SET_DELAY_TIMER = 0x07,
+    GET_DELAY_TIMER = 0x07,
     VX_WAIT_KEY_PRESSED = 0x0A,
-    VX_SET_BY_DELAY_TIMER = 0x15,
-    VX_SET_BY_SOUND_TIMER = 0x18,
+    SET_DELAY_TIMER = 0x15,
+    SET_SOUND_TIMER = 0x18,
     I_ADD_VX = 0x1E,
     I_SET_BY_SPRITE_ADDR = 0x29,
     I_STORE_BCD = 0x33,

@@ -1,12 +1,12 @@
 QT += quick
-
-# You can make your code fail to compile if it uses deprecated APIs.
-# In order to do so, uncomment the following line.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+CONFIG += c++11
+CONFIG += qmltypes
+QML_IMPORT_NAME = backend
+QML_IMPORT_MAJOR_VERSION = 1
 
 SOURCES += \
-        chip8.cpp \
-        chip8model.cpp \
+        chip8emulator.cpp \
+        common.cpp \
         main.cpp \
         opcode.cpp
 
@@ -24,8 +24,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    chip8.h \
-    chip8model.h \
+    chip8emulator.h \
     common.h \
     constants.h \
     opcode.h
+

@@ -1,28 +1,50 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.12
+import backend 1.0
 
-ApplicationWindows {
-    width: 640
-    height: 320
+ApplicationWindow {
+    minimumWidth: 768
+    minimumHeight: 768
+    maximumWidth: 768
+    maximumHeight: 768
+    flags: Qt.Dialog
     visible: true
+    title: "Chip8 Emulator QT"
 
-    GridView {
-        id: display
-        cellWidth: parent.width/64
-        cellHeight: parent.height/32
-
-        delegate: Rectangle {
-            id: delegate
-            width: display.cellWidth
-            height: display.cellHeight
-            property bool selected: GridView.isCurrentItem
-            property int actual: model.actual
-            property int prediction: model.prediction
-            property var candidates: model.candidates
-            border.color: "#a6a6a6"
-            border.width: 0.5
-            color: selected ? "#87b1ff" : "transparent"
-        }
+    Chip8Emulator {
+        id: chip8
     }
+
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 2
+        GridView {
+            id: display
+            Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+            Layout.preferredWidth: parent.width
+            Layout.preferredHeight: parent.height/2
+            cellWidth: width/64
+            cellHeight: height/32
+            model: chip8
+            delegate: Rectangle {
+                id: delegate
+                width: display.cellWidth
+                height: display.cellHeight
+    //            border.color: "#ffffff"
+    //            border.width: 0.5
+                color: model.status ? "#00ffe5" : "#000000"
+            }
+        }
+
+        ControlPanel {
+            id: controlPanel
+            Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
+            Layout.preferredWidth: parent.width
+            Layout.preferredHeight: parent.height/2
+        }
+
+    }
+
+
 }

@@ -1,49 +1,68 @@
 #include <QFile>
-#include "chip8model.h"
-#include "constants.h"
+#include <QRandomGenerator>
+#include <QDebug>
+#include "emulator.h"
 
-Chip8Model::Chip8Model(QObject *parent)
-    : QAbstractItemModel(parent),
-    ram(RAM_AMOUNT, 0x00),
-    pc(PROGRAM_START_ADDRESS),
-    delayTimer(),
-    soundTimer()
+Emulator::Emulator(QObject *parent)
+    : QObject{parent},
+      ram(RAM_AMOUNT, 0x00),
+      screenPixels(WIDTH*HEIGHT, 0),
+      pc(PROGRAM_START_ADDRESS),
+      delayTimer(),
+      soundTimer(),
+      runningTimer(),
+      displayTimer()
 {
     this->init();
 }
 
-int Chip8Model::rowCount(const QModelIndex &parent) const
-{
-    if (!parent.isValid())
-        return 0;
 
-    return WIDTH*HEIGHT;
+void Emulator::stop()
+{
+    this->runningTimer.stop();
+    this->delayTimer.stop();
+    this->soundTimer.stop();
+    this->delayTimerValue = 0;
+    this->soundTimerValue = 0;
+
 }
 
-QVariant Chip8Model::data(const QModelIndex &index, int role) const
+QVariantList Emulator::pixels()
 {
-    Q_UNUSED(role);
-
-    quint8 row = index.row()%WIDTH;
-    quint8 col = index.row()/HEIGHT + 1;
-    if (!index.isValid())
-        return QVariant();
-
-    // FIXME: Implement me!
-    return QVariant(this->screenPixels[row][col]);
+    QVariantList data;
+    for (int &i : this->screenPixels)
+    {
+        data << i;
+    }
+    return data;
 }
 
-void Chip8Model::init()
+
+void Emulator::init()
 {
     // Load font
     this->loadFont();
 
     // Init timer
-    connect(this->delayTimer, &QTimer::timeout, this, &onDelayTimerExpried);
-    connect(this->soundTimer, &QTimer::timeout, this, &onSoundTimerExpried);
+    this->delayTimer.setInterval(COUNTDOWN_PERIOD);
+    this->delayTimer.setTimerType(Qt::PreciseTimer);
+    this->soundTimer.setInterval(COUNTDOWN_PERIOD);
+    this->soundTimer.setTimerType(Qt::PreciseTimer);
+    connect(&this->delayTimer, &QTimer::timeout, this, &Emulator::onDelayTimerExpried);
+    connect(&this->soundTimer, &QTimer::timeout, this, &Emulator::onSoundTimerExpried);
+
+    // running timer
+    this->runningTimer.setSingleShot(true);
+    this->runningTimer.setInterval(0);
+    connect(&this->runningTimer, &QTimer::timeout, this, &Emulator::run);
+
+    // display update timer
+    this->displayTimer.setInterval(COUNTDOWN_PERIOD);
+    connect(&this->displayTimer, &QTimer::timeout, this, &Emulator::onDisplayTimerExpired);
+    this->displayTimer.start();
 }
 
-void Chip8Model::loadFont()
+void Emulator::loadFont()
 {
     for (quint16 i = 0; i < FONT_LENGTH; i++)
     {
@@ -51,19 +70,20 @@ void Chip8Model::loadFont()
     }
 }
 
-void Chip8Model::setPC(quint16 addr)
+void Emulator::setPC(quint16 addr)
 {
     this->pc = addr;
 }
 
-void Chip8Model::nextOpcode()
+void Emulator::nextOpcode()
 {
     this->pc+=2;
 }
 
-void clear()
+void Emulator::clear()
 {
     // Stop timers
+    this->runningTimer.stop();
     this->delayTimer.stop();
     this->soundTimer.stop();
     this->delayTimerValue = 0;
@@ -78,42 +98,67 @@ void clear()
     this->ram.replace(PROGRAM_START_ADDRESS, PROGRAM_MAX_SIZE, QByteArray(PROGRAM_MAX_SIZE, 0x00));
 }
 
-void Chip8Model::run(QString &rom)
+void Emulator::run()
 {
+    // run the program
+    quint16 bytes;
+    Opcode opcode;
+    while (this->pc < this->romSize + PROGRAM_START_ADDRESS)
+    {
+        bytes = this->fetch();
+        if (!bytes) break;
+        opcode = this->decode(bytes);
+        this->execute(opcode);
+    }
+}
 
+void Emulator::romChanged(QString &rom)
+{
+    qDebug() << "ROM changed!";
     // Clear
     this->clear();
     // Load rom
     this->loadROM(rom);
+    // run
+    this->runningTimer.start();
+    qDebug() << "running";
 
 }
 
-void Chip8Model::loadROM(QString &rom)
+void Emulator::loadROM(QString &rom)
 {
     QFile file(rom);
     QByteArray data;
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         data = file.readAll();
         file.close();
     }
+    else
+    {
+        qDebug() << "error read file!";
+    }
 
-    this->ram.replace(PROGRAM_START_ADDRESS, data.size(), data);
+    this->romSize = data.size();
+    this->ram.replace(PROGRAM_START_ADDRESS, romSize, data);
 }
 
-quint16 Chip8Model::fetch()
+quint16 Emulator::fetch()
 {
-    quint16 opcode =  this->ram.mid(this->pc, 2).toInt();
+    QByteArray bytes = this->ram.mid(this->pc, 2);
+    QDataStream dataStream(bytes);
+    quint16 opcode;
+    dataStream >> opcode;
     this->nextOpcode();
     return opcode;
 }
 
-Opcode Chip8Model::decode(quint16 &bytes)
+Opcode Emulator::decode(quint16 &bytes)
 {
     return Opcode(bytes);
 }
 
-void Chip8Model::execute(Opcode &code)
+void Emulator::execute(Opcode &code)
 {
     switch (code.type) {
     case ZERO_OP: // 00EE - 00E0 - 0NNN
@@ -164,23 +209,32 @@ void Chip8Model::execute(Opcode &code)
         this->executeMathOp(code);
         break;
     case VX_NE_VY: // 9XY0
+        if (this->regs[code.x] != this->regs[code.y])
+        {
+            this->nextOpcode();
+        }
         break;
     case I_SET_NNN: // ANNN
+        this->memReg = code.nnn;
         break;
     case JUMP_B: // BNNN
+        this->setPC(this->memReg + this->regs[code.x]);
         break;
     case VX_RAND:// CXNN
+        this->regs[code.x] = QRandomGenerator::global()->generate() & code.nn;
         break;
     case DRAW_SPRITE: // DXYN
+        this->draw(this->regs[code.x], this->regs[code.y], code.n);
         break;
-    case KEY_OP: // EX9E, EXA1
+    case E_OP: // EX9E, EXA1
         break;
     case F_OP: // FX{07, 0A, 15, 18, 1E, 29, 33, 55, 65}
+        this->executeFOpGroup(code);
         break;
     }
 }
 
-void Chip8Model::clearRegs()
+void Emulator::clearRegs()
 {
     for (auto &reg : this->regs)
     {
@@ -188,23 +242,20 @@ void Chip8Model::clearRegs()
     }
 }
 
-void Chip8Model::clearMemRegs()
+void Emulator::clearMemReg()
 {
-    this->memRegs = 0x00;
+    this->memReg = 0x00;
 }
 
-void Chip8Model::clearDisplay()
+void Emulator::clearDisplay()
 {
-    for (quint8 i = 0; i < HEIGHT; i++)
+    for (int &i : this->screenPixels)
     {
-        for (quint8 j = 0; j < WIDTH; j++)
-        {
-            this->screenPixels[i][j] = false;
-        }
+        i = 0;
     }
 }
 
-void draw(quint8 x, quint8 y, quint8 n)
+void Emulator::draw(quint8 x, quint8 y, quint8 n)
 {
     // Ensure x is in range [0, 63]
     x&=(WIDTH - 1);
@@ -214,24 +265,24 @@ void draw(quint8 x, quint8 y, quint8 n)
     // Set VF to 0
     this->regs[NUM_REGS - 1] = 0;
 
-    for (quint16 row = y; row < y + n && row < HEIGHT; row++)
+    for (quint16 row = 0; row < n && (row + y < HEIGHT); row++)
     {
-        quint8 ridx = x;
         quint8 pixels = this->ram.at(this->memReg + row);
         for (quint8 col = 0; col < 8 && (col + x < WIDTH); col++)
         {
-            quint8 pixel = ((pixels >> (col + 1)) & 1);
+            quint16 pixelIdx = (row + y)*WIDTH + (col + x);
+            quint8 pixel = ((pixels >> (7 - col)) & 1);
             if (pixel)
             {
-                if (pixel ^ this->screenPixels[col + x][row])
+                if (pixel ^ this->screenPixels[pixelIdx])
                 {
                     // incase(1 ^ 0 = 1)
-                    this->screenPixels[col + x][row] = true;
+                    this->screenPixels[pixelIdx] = 1;
                 } else
                 {
                     // incase (1 ^ 1 = 0)
-                    this->screenPixels[col + x][row] = false;
-                    this->regs[NUM_REGS - 1];
+                    this->screenPixels[pixelIdx] = 0;
+                    this->regs[NUM_REGS - 1] = 1;
                 }
             }
         }
@@ -239,7 +290,7 @@ void draw(quint8 x, quint8 y, quint8 n)
 
 }
 
-void Chip8Model::executeMathOp(Opcode &code)
+void Emulator::executeMathOp(Opcode &code)
 {
     quint8 &VX = this->regs[code.x];
     quint8 &VY = this->regs[code.y];
@@ -290,7 +341,7 @@ void Chip8Model::executeMathOp(Opcode &code)
     }
 }
 
-void executeFOpGroup(Opcode &code)
+void Emulator::executeFOpGroup(Opcode &code)
 {
     quint8 &VX = this->regs[code.x];
 
@@ -325,7 +376,7 @@ void executeFOpGroup(Opcode &code)
     }
 }
 
-void regDump(quint8 x)
+void Emulator::regDump(quint8 x)
 {
     quint16 start = this->memReg;
     for (quint8 i = 0; i < x; i++)
@@ -334,7 +385,7 @@ void regDump(quint8 x)
     }
 }
 
-void regLoad(quint8 x)
+void Emulator::regLoad(quint8 x)
 {
     quint16 start = this->memReg;
     for (quint8 i = 0; i < x; i++)
@@ -343,7 +394,7 @@ void regLoad(quint8 x)
     }
 }
 
-void BCDStorage(quint8 val)
+void Emulator::BCDStorage(quint8 val)
 {
     for (int i = 2; i >= 0; i--)
     {
@@ -352,23 +403,23 @@ void BCDStorage(quint8 val)
     }
 }
 
-void setDelayTimerValue(quint8 val)
+void Emulator::setDelayTimerValue(quint8 val)
 {
     this->delayTimer.stop();
     this->delayTimerValue = val;
-    this->delayTimer.start(0.1666666666667);
+    this->delayTimer.start();
 }
 
-void setSoundTimerValue(quint8 val)
+void Emulator::setSoundTimerValue(quint8 val)
 {
     this->soundTimer.stop();
     this->soundTimerValue = val;
-    this->soundTimer.start(0.1666666666667);
+    this->soundTimer.start();
 
     // TODO enable beep
 }
 
-void onDelayTimerExpried()
+void Emulator::onDelayTimerExpried()
 {
     this->delayTimerValue--;
     if (this->delayTimerValue == 0)
@@ -377,14 +428,22 @@ void onDelayTimerExpried()
     }
 }
 
-void onSoundTimerExpried()
+void Emulator::onSoundTimerExpried()
 {
     this->soundTimerValue--;
     if (this->soundTimerValue == 0)
     {
-        this->soundTimerValue.stop();
+        this->soundTimer.stop();
         // TODO disable beep
     }
 }
 
+void Emulator::onDisplayTimerExpired()
+{
+    emit pixelsChanged();
+}
 
+void Emulator::keyPressedWaiting(quint8 val)
+{
+
+}
