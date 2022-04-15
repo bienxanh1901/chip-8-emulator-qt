@@ -13,12 +13,6 @@ Rectangle {
         title: "Choose a ROM"
         onAccepted: {
             chip8.loadProgram(selectedFile)
-            console.log(currentFolder)
-
-        }
-        onRejected: {
-            console.log("Canceled")
-            console.log(currentFolder)
         }
     }
 
@@ -90,8 +84,9 @@ Rectangle {
 
     Keys.onPressed: (event) => {
         if (event.key >= Qt.Key_0 && event.key <= Qt.Key_9) {
-            console.log(event.key - Qt.Key_0);
             chip8.keyPressed = event.key - Qt.Key_0;
+        } else if (event.key >= Qt.Key_A && event.key <= Qt.Key_F) {
+            chip8.keyPressed = event.key - 55;
         }
     }
 

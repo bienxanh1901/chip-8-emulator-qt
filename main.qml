@@ -31,8 +31,6 @@ ApplicationWindow {
                 id: delegate
                 width: display.cellWidth
                 height: display.cellHeight
-    //            border.color: "#ffffff"
-    //            border.width: 0.5
                 color: model.status ? "#00ffe5" : "#000000"
             }
         }
