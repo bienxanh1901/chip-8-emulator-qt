@@ -273,11 +273,6 @@ void Chip8Emulator::clearDisplay()
 
 void Chip8Emulator::draw(quint8 x0, quint8 y0, quint8 h)
 {
-    // Ensure x is in range [0, 63]
-    x0&=(WIDTH - 1);
-    // Ensure y is in range [0, 31]
-    y0&=(HEIGHT - 1);
-
     // Set VF to 0
     this->varRegs[0x0F] = 0;
     quint16 spriteIdx = this->idxReg;
@@ -285,11 +280,12 @@ void Chip8Emulator::draw(quint8 x0, quint8 y0, quint8 h)
     for (quint16 y = 0; y < h; y++, spriteIdx++)
     {
         quint8 sprite = this->ram.at(spriteIdx);
-        quint16 idx = (y + y0)*WIDTH + x0;
+        quint16 idx = 0;
 
-        for (quint8 col = 0; col < 8; col++, idx++)
+        for (quint8 x = 0; x < 8; x++)
         {
-            quint8 pixel = ((sprite >> (7 - col)) & 1);
+            idx = ((y + y0)%HEIGHT)*WIDTH + (x + x0)%WIDTH;
+            quint8 pixel = ((sprite >> (7 - x)) & 1);
 
             if (pixel)
             {
