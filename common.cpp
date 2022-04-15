@@ -10,7 +10,7 @@
 bool readFile(QString &path, QByteArray &data)
 {
     QFile file(path);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (file.open(QIODevice::ReadOnly))
     {
         data = file.readAll();
         file.close();
