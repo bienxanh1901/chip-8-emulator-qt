@@ -77,6 +77,10 @@ private slots:
     void run();
 
 private:
+    void debug(Opcode &code);
+
+
+private:
     // RAM with 4096 bytes
     QByteArray ram;
     // display 64x32 pixels

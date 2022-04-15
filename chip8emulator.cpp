@@ -1,7 +1,6 @@
 #include <QFile>
 #include <QRandomGenerator>
 #include <QCoreApplication>
-#include <QDebug>
 #include "chip8emulator.h"
 #include "common.h"
 
@@ -106,6 +105,9 @@ void Chip8Emulator::run()
     this->execute(opcode);
     // handle timer
     this->timerHandler();
+//#ifdef QT_DEBUG
+//    this->debug(opcode);
+//#endif
 }
 
 void Chip8Emulator::setCurrKeyPressed(quint8 newCurrKeyPressed)
@@ -137,7 +139,6 @@ bool Chip8Emulator::loadROM(QString &rom)
         return true;
     } else {
         // TODO handle error
-        qDebug() << "Load ROM Failed";
         return false;
     }
 }
@@ -164,12 +165,10 @@ void Chip8Emulator::execute(Opcode &code)
         if (code.nn == 0xEE)
         {
             this->setPC(this->stack.pop());
-            qDebug() << "Jump to " << this->pc;
         }
         else if (code.nn == 0xE0)
         {
             this->clearDisplay();
-            qDebug() << "Clear Display";
         }
         else
         {
@@ -178,41 +177,34 @@ void Chip8Emulator::execute(Opcode &code)
         break;
     case JUMP_1: // 1NNN
         this->setPC(code.nnn);
-        qDebug() << "Set PC = " << code.nnn;
         break;
     case CALL_SUB: // 2NNN
         this->stack.push(this->pc);
         this->setPC(code.nnn);
-        qDebug() << "Call subroutine at " << code.nnn;
         break;
     case VX_EQ_NN: // 3XNN
         if (this->varRegs[code.x] == code.nn)
         {
             this->nextOpcode();
-            qDebug() << "Skip next Opcode 3XNN " << "V[" << code.x << "] ==" << code.nn;
         }
         break;
     case VX_NE_NN: // 4XNN
         if (this->varRegs[code.x] != code.nn)
         {
             this->nextOpcode();
-            qDebug() << "Skip next Opcode 4XNN " << "V[" << code.x << "] !=" << code.nn;
         }
         break;
     case VX_EQ_VY: // 5XY0
         if (this->varRegs[code.x] == this->varRegs[code.y])
         {
             this->nextOpcode();
-            qDebug() << "Skip next Opcode 5XNN " << "V[" << code.x << "] !=" << "V[" << code.y << "]";
         }
         break;
     case VX_SET_NN: // 6XNN.
         this->varRegs[code.x] = code.nn;
-        qDebug() << "Set V[" << code.x << "] = " << code.nn;
         break;
     case VX_ADD_NN: // 7XNN
         this->varRegs[code.x]+= code.nn;
-        qDebug() << "V[" << code.x << "] += " << code.nn;
         break;
     case VXY_MATH: // 8XY{0, 1, 2, 3, 4, 5, 6, 7, E}
         this->opcode8Handler(code);
@@ -221,24 +213,19 @@ void Chip8Emulator::execute(Opcode &code)
         if (this->varRegs[code.x] != this->varRegs[code.y])
         {
             this->nextOpcode();
-            qDebug() << "Skip next Opcode 9XY0";
         }
         break;
     case I_SET_NNN: // ANNN
         this->idxReg = code.nnn;
-        qDebug() << "I = " << code.nnn;
         break;
     case JUMP_B: // BNNN
         this->setPC(code.nnn + this->varRegs[0]);
-        qDebug() << "PC = " << this->pc;
         break;
     case VX_RAND:// CXNN
         this->varRegs[code.x] = (QRandomGenerator::global()->generate()%255) & code.nn;
-        qDebug() << "V[" << code.x << "] += " << this->varRegs[code.x];
         break;
     case DRAW_SPRITE: // DXYN
         this->draw(this->varRegs[code.x], this->varRegs[code.y], code.n);
-        qDebug() << " Draws (x, y, h) = (" << this->varRegs[code.x] << ", " << this->varRegs[code.y] << ", " << code.n << ")";
         break;
     case E_OP: // EX9E, EXA1
         if (code.nn == 0x9E)
@@ -246,14 +233,12 @@ void Chip8Emulator::execute(Opcode &code)
             if (this->varRegs[code.x] == this->currKey)
             {
                 this->nextOpcode();
-                qDebug() << "Skip next Opcode EX9E";
             }
         } else if (code.nn == 0xA1)
         {
             if (this->varRegs[code.x] != this->currKey)
             {
                 this->nextOpcode();
-                qDebug() << "Skip next Opcode EXA1";
             }
         }
         break;
@@ -330,18 +315,14 @@ void Chip8Emulator::opcode8Handler(Opcode &code)
     switch (code.n) {
     case VXY_SET: // 8XY0
         VX = VY;
-        qDebug() << "Set V[" << code.x << "] = " << "V[" << code.y << "]";
         break;
     case VXY_OR: // 8XY1
         VX|= VY;
-        qDebug() << "Set V[" << code.x << "] |= " << "V[" << code.y << "]";
         break;
     case VXY_AND: // 8XY2
-        qDebug() << "Set V[" << code.x << "] &= " << "V[" << code.y << "]";
         VX&= VY;
         break;
     case VXY_XOR: // 8XY3
-        qDebug() << "Set V[" << code.x << "] ^= " << "V[" << code.y << "]";
         VX^= VY;
         break;
     case VXY_ADD: // 8XY4
@@ -355,7 +336,6 @@ void Chip8Emulator::opcode8Handler(Opcode &code)
             VF = 0x00;
         }
         VX = tmp;
-        qDebug() << "Set V[" << code.x << "] += " << "V[" << code.y << "] 8XY4";
     }
         break;
     case VXY_SUB: // 8XY5
@@ -368,12 +348,10 @@ void Chip8Emulator::opcode8Handler(Opcode &code)
         }
 
         VX-= VY;
-        qDebug() << "Set V[" << code.x << "] -= " << "V[" << code.y << "] 8XY5";
         break;
     case VXY_LSB: // 8XY6
         VF = VX & 1;
         VX>>= 1;
-        qDebug() << "V[" << code.x << "] >> 1";
         break;
     case VXY_MINUS: // 8XY7
         if (VY >= VX)
@@ -384,12 +362,10 @@ void Chip8Emulator::opcode8Handler(Opcode &code)
             VF = 0x00; // borrow
         }
         VX = VY - VX;
-        qDebug() << "Set V[" << code.x << "] = " << "V[" << code.y << "] - V[" << code.x << "] 8XY5";
         break;
     case VXY_MSB: // 8XYE
         VF = VX >> 7;
         VX<<= 1;
-        qDebug() << "V[" << code.x << "] << 1";
         break;
     }
 }
@@ -401,40 +377,31 @@ void Chip8Emulator::opcodeFHandler(Opcode &code)
     switch (code.nn) {
     case GET_DELAY_TIMER: // FX07
         VX = this->delayTimer;
-        qDebug() << "V[" << code.x << "] = delayTimerval = " << VX;
         break;
     case VX_WAIT_KEY_PRESSED: // FX0A
-        qDebug() << "Keypress waiting ";
         VX = this->waitKey();
         break;
     case SET_DELAY_TIMER: // FX15
         this->delayTimer = VX;
-        qDebug() << "Set Delay timer = " << this->delayTimer;
         break;
     case SET_SOUND_TIMER: // FX18
         this->soundTimer = VX;
         //TODO enable sound
-        qDebug() << "Set Sound timer" << this->soundTimer;
         break;
     case I_ADD_VX: // FX1E
         this->idxReg+= VX;
-        qDebug() << "I = " << this->idxReg;
         break;
     case I_SET_BY_SPRITE_ADDR: // FX29
         this->idxReg = VX*5 + FONT_START_ADDRESS;
-        qDebug() << "FX29 I = " << this->idxReg;
         break;
     case I_STORE_BCD:// FX33
         this->BCDStorage(VX);
-        qDebug() << "BCD Storage";
         break;
     case REG_DUMP: // FX55
         this->regDump(code.x);
-        qDebug() << "RegDump";
         break;
     case REG_LOAD: // FX65
         this->regLoad(code.x);
-        qDebug() << "RegLoad";
         break;
     }
 }
