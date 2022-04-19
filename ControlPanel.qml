@@ -12,7 +12,7 @@ Rectangle {
         id: fileDialog
         title: "Choose a ROM"
         onAccepted: {
-            chip8.loadProgram(selectedFile)
+            chip8.startProgram(selectedFile)
         }
     }
 
@@ -35,19 +35,29 @@ Rectangle {
             }
 
             RoundButton {
-                id: speedUpButton
+                id: pauseButton
                 Layout.alignment: Qt.AlignHCenter
                 Layout.preferredWidth: parent.width/1.5
                 Layout.preferredHeight: parent.height/5
-                text: "Speed up"
+                text: (chip8.stage === Chip8Emulator.RunningStage)?"Pause":"Resume"
+                onClicked: {
+                    if (chip8.stage === Chip8Emulator.RunningStage) {
+                        chip8.pause();
+                    } else {
+                        chip8.resume();
+                    }
+                }
             }
 
             RoundButton {
-                id: speedDownButton
+                id: restartButton
                 Layout.alignment: Qt.AlignHCenter
                 Layout.preferredWidth: parent.width/1.5
                 Layout.preferredHeight: parent.height/5
-                text: "Speed down"
+                text: "Restart"
+                onClicked: {
+                    chip8.restart();
+                }
             }
 
         }
@@ -64,21 +74,21 @@ Rectangle {
             Layout.preferredWidth: parent.width/4
             Layout.preferredHeight: parent.height
 
-            RoundButton {
-                id: pauseButton
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: parent.width/1.5
-                Layout.preferredHeight: parent.height/5
-                text: "Pause"
-            }
+//            RoundButton {
+//                id: pauseButton
+//                Layout.alignment: Qt.AlignHCenter
+//                Layout.preferredWidth: parent.width/1.5
+//                Layout.preferredHeight: parent.height/5
+//                text: "Pause"
+//            }
 
-            RoundButton {
-                id: restartButton
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: parent.width/1.5
-                Layout.preferredHeight: parent.height/5
-                text: "Restart"
-            }
+//            RoundButton {
+//                id: restartButton
+//                Layout.alignment: Qt.AlignHCenter
+//                Layout.preferredWidth: parent.width/1.5
+//                Layout.preferredHeight: parent.height/5
+//                text: "Restart"
+//            }
         }
     }
 
