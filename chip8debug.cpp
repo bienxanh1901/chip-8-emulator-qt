@@ -33,8 +33,8 @@ void Chip8Emulator::debug(Opcode &code)
     qDebug() << "Program Counter PC = " << Qt::hex << this->pc;
     qDebug() << "opcode start: " << Qt::hex << this->ram[this->pc];
     qDebug() << "Index Registor: I = " << Qt::hex << this->idxReg;
-    qDebug() << "Delay Timer: DTm = " << Qt::hex << this->delayTimer;
-    qDebug() << "Sound Timer: STm = " << Qt::hex << this->soundTimer;
+    qDebug() << "Delay Timer: DTm = " << Qt::hex << this->delayTM;
+    qDebug() << "Sound Timer: STm = " << Qt::hex << this->soundTM;
     qDebug() << "================================================";
 
 }

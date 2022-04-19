@@ -7,12 +7,12 @@
  * @param data: Buffer to store data
  * @return true if it is successed, false if it encountered an error
  */
-bool readFile(QString &path, QByteArray &data)
+bool readFile(QString &path, QByteArray* data)
 {
     QFile file(path);
     if (file.open(QIODevice::ReadOnly))
     {
-        data = file.readAll();
+        *data = file.readAll();
         file.close();
         return true;
     }

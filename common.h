@@ -4,7 +4,7 @@
 #include <QString>
 
 
-bool readFile(QString &path, QByteArray &data);
+bool readFile(QString &path, QByteArray* data);
 
 QString fileUrlToPath(QString &fileUrl);
 #endif // COMMON_H

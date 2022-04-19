@@ -19,8 +19,8 @@ const quint8 NUM_VAR_REGS(16);
 
 
 // timer
-const quint8 CLOCK_TICK(17);
-const quint8 RUNNING_SPEED(1);
+const quint8 TIMER_PERIOD(17);
+const quint8 CLOCK_TICK(1);
 
 // Opcode instruction type definition
 /*
@@ -43,7 +43,7 @@ VN: One of the 16 available variables. N may be 0 to F (hexadecimal);
 4XNN - Skips the next instruction if VX does not equal NN.
 5XY0 - Skips the next instruction if VX equals VY.
 6XNN - Sets VX to NN.
-7XNN - Adds NN to VX. (Carry flag is not changed);
+7XNN - Adds NN to VX. (Carry flag is not changed).
 8XY0 - Sets VX to the value of VY.
 8XY1 - Sets VX to VX or VY. (Bitwise OR operation).
 8XY2 - Sets VX to VX and VY. (Bitwise AND operation).
@@ -71,28 +71,7 @@ FX55 - Stores from V0 to VX (including VX) in memory, starting at address I. The
 FX65 - Fills from V0 to VX (including VX) with values from memory, starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
 */
 
-
-enum InstructionTypes {
-    ZERO_OP = 0x00,
-    JUMP_1 = 0x01,
-    CALL_SUB = 0x02,
-    VX_EQ_NN = 0x03,
-    VX_NE_NN = 0x04,
-    VX_EQ_VY = 0x05,
-    VX_SET_NN = 0x06,
-    VX_ADD_NN = 0x07,
-    VXY_MATH  = 0x08,
-    VX_NE_VY = 0x09,
-    I_SET_NNN = 0x0A,
-    JUMP_B = 0x0B,
-    VX_RAND = 0x0C,
-    DRAW_SPRITE = 0x0D,
-    E_OP = 0x0E,
-    F_OP = 0x0F
-};
-
-
-enum MathOpcode {
+enum Opcode8Types {
     VXY_SET = 0x00,
     VXY_OR = 0x01,
     VXY_AND = 0x02,
@@ -104,19 +83,14 @@ enum MathOpcode {
     VXY_MSB = 0x0E
 };
 
-enum KeyOpcode {
-    KEY_PRESSED = 0x9E,
-    KEY_NOT_PRESSED = 0xA1
-};
-
-enum FOpcode {
-    GET_DELAY_TIMER = 0x07,
-    VX_WAIT_KEY_PRESSED = 0x0A,
-    SET_DELAY_TIMER = 0x15,
-    SET_SOUND_TIMER = 0x18,
+enum OpcodeFTypes {
+    GET_DELAY_TM = 0x07,
+    WAIT_KEY = 0x0A,
+    SET_DELAY_TM = 0x15,
+    SET_SOUND_TM = 0x18,
     I_ADD_VX = 0x1E,
-    I_SET_BY_SPRITE_ADDR = 0x29,
-    I_STORE_BCD = 0x33,
+    I_SET_SPRITE_ADDR = 0x29,
+    BCD_STORE = 0x33,
     REG_DUMP = 0x55,
     REG_LOAD = 0x65
 };

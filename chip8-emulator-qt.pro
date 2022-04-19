@@ -9,7 +9,8 @@ SOURCES += \
         chip8emulator.cpp \
         common.cpp \
         main.cpp \
-        opcode.cpp
+        opcode.cpp \
+        opcodehandler.cpp
 
 RESOURCES += qml.qrc
 

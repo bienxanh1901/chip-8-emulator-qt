@@ -13,11 +13,19 @@ class Chip8Emulator : public QAbstractListModel
     Q_OBJECT
     QML_ELEMENT
     Q_PROPERTY(int keyPressed WRITE setCurrKeyPressed)
+    Q_PROPERTY(Stages stage READ getStage NOTIFY stageChanged)
 public:
     enum Roles {
         PixelRole = Qt::UserRole + 1,
     };
+
+    enum Stages {
+        RunningStage,
+        PauseStage
+    };
+
     Q_ENUM(Roles)
+    Q_ENUM(Stages)
 
     explicit Chip8Emulator(QObject *parent = nullptr);
 
@@ -28,30 +36,33 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE void loadProgram(QString &rom);
+    Q_INVOKABLE void startProgram(QString &rom);
     Q_INVOKABLE void pause();
     Q_INVOKABLE void resume();
     Q_INVOKABLE void restart();
     void setCurrKeyPressed(quint8 newCurrKeyPressed);
-
+    Stages getStage();
+signals:
+    void stageChanged();
 private:
 
     // init
     void init();
     void loadFont();
+    void setStage(Stages st);
 
     // PC handler
     void setPC(quint16 addr);
     void nextOpcode();
 
     // Program running handler
-    bool loadROM(QString &rom);
+    void loadROM();
+    bool readROM(QString &rom);
+    void clearROM();
     quint16 fetch();
     Opcode decode(quint16 &bytes);
-    void execute(Opcode &code);
+    void execute(Opcode & code);
     void clear();
-
-    // Registors handler
     void clearRegs();
     void clearIdxReg();
 
@@ -60,7 +71,22 @@ private:
     void draw(quint8 x0, quint8 y0, quint8 h);
 
     // Opcode handler
+    void OpcodeHandler(Opcode &code);
+    void opcode0Handler(Opcode &code);
+    void opcode1Handler(Opcode &code);
+    void opcode2Handler(Opcode &code);
+    void opcode3Handler(Opcode &code);
+    void opcode4Handler(Opcode &code);
+    void opcode5Handler(Opcode &code);
+    void opcode6Handler(Opcode &code);
+    void opcode7Handler(Opcode &code);
     void opcode8Handler(Opcode &code);
+    void opcode9Handler(Opcode &code);
+    void opcodeAHandler(Opcode &code);
+    void opcodeBHandler(Opcode &code);
+    void opcodeCHandler(Opcode &code);
+    void opcodeDHandler(Opcode &code);
+    void opcodeEHandler(Opcode &code);
     void opcodeFHandler(Opcode &code);
     void regDump(quint8 x);
     void regLoad(quint8 x);
@@ -95,13 +121,16 @@ private:
     quint8 varRegs[NUM_VAR_REGS] = {0};
     // key pressed
     quint8 currKey = 0xFF;
-    // rom size
-    quint16 romSize = 0;
     // timers
     QTimer CPUTimer;
-    quint8 delayTimer = 0;
-    quint8 soundTimer = 0;
+    quint8 delayTM = 0;
+    quint8 soundTM = 0;
     quint16 clockCounter = 0;
+
+    // status
+    Stages stage = RunningStage;
+
+    std::unique_ptr<QByteArray> rom;
 };
 
 #endif // CHIP8EMULATOR_H
