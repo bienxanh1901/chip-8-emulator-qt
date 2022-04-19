@@ -1,4 +1,5 @@
 #include <QFile>
+//#include <QDebug>
 #include "common.h"
 
 /**
@@ -18,7 +19,7 @@ bool readFile(QString &path, QByteArray* data)
     }
     else
     {
-        // TODO handle error
+//        qDebug() << file.errorString();
         return false;
     }
 }

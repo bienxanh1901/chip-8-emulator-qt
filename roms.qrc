@@ -1,0 +1,95 @@
+<RCC>
+    <qresource prefix="/">
+        <file>roms/15 Puzzle.ch8</file>
+        <file>roms/Addition Problems.ch8</file>
+        <file>roms/Airplane.ch8</file>
+        <file>roms/Animal Race.ch8</file>
+        <file>roms/Astro Dodge.ch8</file>
+        <file>roms/Biorhythm.ch8</file>
+        <file>roms/Blinky.ch8</file>
+        <file>roms/Blitz.ch8</file>
+        <file>roms/BMP Viewer.ch8</file>
+        <file>roms/Bowling.ch8</file>
+        <file>roms/Breakout.ch8</file>
+        <file>roms/Brick.ch8</file>
+        <file>roms/Brix.ch8</file>
+        <file>roms/Cave.ch8</file>
+        <file>roms/Chip8 emulator Logo.ch8</file>
+        <file>roms/Chip8 Picture.ch8</file>
+        <file>roms/Clock Program.ch8</file>
+        <file>roms/Coin Flipping.ch8</file>
+        <file>roms/Connect 4.ch8</file>
+        <file>roms/Craps.ch8</file>
+        <file>roms/Deflection.ch8</file>
+        <file>roms/Delay Timer Test.ch8</file>
+        <file>roms/Division Test.ch8</file>
+        <file>roms/Figures.ch8</file>
+        <file>roms/Filter.ch8</file>
+        <file>roms/Fishie.ch8</file>
+        <file>roms/Framed MK1.ch8</file>
+        <file>roms/Framed MK2.ch8</file>
+        <file>roms/Guess.ch8</file>
+        <file>roms/Hidden.ch8</file>
+        <file>roms/IBM Logo.ch8</file>
+        <file>roms/Jumping X and O.ch8</file>
+        <file>roms/Kaleidoscope.ch8</file>
+        <file>roms/Keypad Test.ch8</file>
+        <file>roms/Landing.ch8</file>
+        <file>roms/Life.ch8</file>
+        <file>roms/Lunar Lander.ch8</file>
+        <file>roms/Mastermind FourRow.ch8</file>
+        <file>roms/Maze.ch8</file>
+        <file>roms/Merlin.ch8</file>
+        <file>roms/Minimal game.ch8</file>
+        <file>roms/Missile.ch8</file>
+        <file>roms/Most Dangerous Game.ch8</file>
+        <file>roms/Nim.ch8</file>
+        <file>roms/Paddles.ch8</file>
+        <file>roms/Particle Demo.ch8</file>
+        <file>roms/Pong.ch8</file>
+        <file>roms/Pong_1P.ch8</file>
+        <file>roms/Pong_2P.ch8</file>
+        <file>roms/Programmable Spacefighters.ch8</file>
+        <file>roms/Puzzle.ch8</file>
+        <file>roms/Random Number Test.ch8</file>
+        <file>roms/Reversi.ch8</file>
+        <file>roms/Rocket Launch.ch8</file>
+        <file>roms/Rocket Launcher.ch8</file>
+        <file>roms/Rocket.ch8</file>
+        <file>roms/Rush Hour.ch8</file>
+        <file>roms/Russian Roulette.ch8</file>
+        <file>roms/Sequence Shoot.ch8</file>
+        <file>roms/Shooting Stars.ch8</file>
+        <file>roms/Sierpinski.ch8</file>
+        <file>roms/Slide.ch8</file>
+        <file>roms/Soccer.ch8</file>
+        <file>roms/Space Flight.ch8</file>
+        <file>roms/Space Intercept.ch8</file>
+        <file>roms/Space Invaders.ch8</file>
+        <file>roms/Spooky Spot.ch8</file>
+        <file>roms/SQRT Test.ch8</file>
+        <file>roms/Squash.ch8</file>
+        <file>roms/Stars.ch8</file>
+        <file>roms/Submarine.ch8</file>
+        <file>roms/Sum Fun.ch8</file>
+        <file>roms/Syzygy.ch8</file>
+        <file>roms/Tank.ch8</file>
+        <file>roms/Tapeworm.ch8</file>
+        <file>roms/Tetris.ch8</file>
+        <file>roms/Tic-Tac-Toe.ch8</file>
+        <file>roms/Timebomb.ch8</file>
+        <file>roms/Trip8 Demo.ch8</file>
+        <file>roms/TRIP8.ch8</file>
+        <file>roms/Tron.ch8</file>
+        <file>roms/UFO.ch8</file>
+        <file>roms/Vers.ch8</file>
+        <file>roms/Vertical Brix.ch8</file>
+        <file>roms/Wall.ch8</file>
+        <file>roms/Wipe Off.ch8</file>
+        <file>roms/Worm V4.ch8</file>
+        <file>roms/X-Mirror.ch8</file>
+        <file>roms/Zero Demo.ch8</file>
+        <file>roms/ZERO.ch8</file>
+        <file>roms/ZeroPong.ch8</file>
+    </qresource>
+</RCC>

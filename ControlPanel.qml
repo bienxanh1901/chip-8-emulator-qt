@@ -5,16 +5,8 @@ import QtQuick.Dialogs
 import backend 1.0
 
 Rectangle {
-    color: "#abfffc"
-    focus: true
-
-    FileDialog {
-        id: fileDialog
-        title: "Choose a ROM"
-        onAccepted: {
-            chip8.startProgram(selectedFile)
-        }
-    }
+//    color: "#abfffc"
+//    focus: true
 
     RowLayout {
         anchors.fill: parent
@@ -23,24 +15,32 @@ Rectangle {
             Layout.preferredWidth: parent.width/4
             Layout.preferredHeight: parent.height
 
-            RoundButton {
-                id: loadROMButton
+            ComboBox {
+                id: selectROMComboBox
                 Layout.alignment: Qt.AlignHCenter
                 Layout.preferredWidth: parent.width/1.5
-                Layout.preferredHeight: parent.height/5
-                text: "Load ROM"
-                onClicked: {
-                    fileDialog.open()
+                Layout.preferredHeight: parent.height/7
+                background: Rectangle {
+                    anchors.fill: parent
+                    color: "#00ff00"
+                }
+
+                textRole: 'text'
+                model: RomList{}
+
+                onActivated: {
+                    chip8.startProgram(model.get(currentIndex).path)
                 }
             }
 
-            RoundButton {
+            ButtonC {
                 id: pauseButton
                 Layout.alignment: Qt.AlignHCenter
                 Layout.preferredWidth: parent.width/1.5
-                Layout.preferredHeight: parent.height/5
-                text: (chip8.stage === Chip8Emulator.RunningStage)?"Pause":"Resume"
-                onClicked: {
+                Layout.preferredHeight: parent.height/7
+                name: (chip8.stage === Chip8Emulator.RunningStage)?"Pause":"Resume"
+
+                mouse.onClicked: {
                     if (chip8.stage === Chip8Emulator.RunningStage) {
                         chip8.pause();
                     } else {
@@ -49,17 +49,16 @@ Rectangle {
                 }
             }
 
-            RoundButton {
+            ButtonC {
                 id: restartButton
                 Layout.alignment: Qt.AlignHCenter
                 Layout.preferredWidth: parent.width/1.5
-                Layout.preferredHeight: parent.height/5
-                text: "Restart"
-                onClicked: {
+                Layout.preferredHeight: parent.height/7
+                name: "Restart"
+                mouse.onClicked: {
                     chip8.restart();
                 }
             }
-
         }
 
         Keyboard {

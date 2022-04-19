@@ -12,7 +12,8 @@ SOURCES += \
         opcode.cpp \
         opcodehandler.cpp
 
-RESOURCES += qml.qrc
+RESOURCES += qml.qrc \
+    roms.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =

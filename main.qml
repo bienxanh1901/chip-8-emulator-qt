@@ -19,19 +19,22 @@ ApplicationWindow {
     ColumnLayout {
         anchors.fill: parent
         spacing: 2
-        GridView {
-            id: display
+        Rectangle {
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
             Layout.preferredWidth: parent.width
             Layout.preferredHeight: parent.height/2
-            cellWidth: width/64
-            cellHeight: height/32
-            model: chip8
-            delegate: Rectangle {
-                id: delegate
-                width: display.cellWidth
-                height: display.cellHeight
-                color: model.status ? "#00ffe5" : "#000000"
+            GridView {
+                id: display
+                anchors.fill: parent
+                cellWidth: width/64
+                cellHeight: height/32
+                model: chip8
+                delegate: Rectangle {
+                    id: delegate
+                    width: display.cellWidth
+                    height: display.cellHeight
+                    color: model.status ? "#00ffe5" : "#000000"
+                }
             }
         }
 
@@ -44,5 +47,8 @@ ApplicationWindow {
 
     }
 
+    Component.onCompleted: {
+        chip8.startProgram(':/roms/Chip8 Picture.ch8')
+    }
 
 }

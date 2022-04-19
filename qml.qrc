@@ -3,5 +3,7 @@
         <file>main.qml</file>
         <file>Keyboard.qml</file>
         <file>ControlPanel.qml</file>
+        <file>RomList.qml</file>
+        <file>ButtonC.qml</file>
     </qresource>
 </RCC>
