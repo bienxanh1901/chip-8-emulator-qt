@@ -12,8 +12,9 @@ Rectangle {
         id: buttonName
         anchors.centerIn: parent
         text: "My Button"
-        font.pixelSize: parent.width/5
+        font.pixelSize: parent.width/6
         font.bold: true
+        font.family: "Arial"
         color: "#ffffff"
     }
 

@@ -146,10 +146,9 @@ void Chip8Emulator::setStage(Stages st)
  */
 void Chip8Emulator::startProgram(QString &rom)
 {
-    QString path(fileUrlToPath(rom));
     this->pause();
     this->clear();
-    if (this->readROM(path))
+    if (this->readROM(rom))
     {
         this->clearROM();
         this->loadROM();

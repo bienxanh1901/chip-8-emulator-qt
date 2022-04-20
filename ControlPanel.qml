@@ -6,37 +6,51 @@ import backend 1.0
 
 Rectangle {
 //    color: "#abfffc"
-//    focus: true
+    focus: true
 
     RowLayout {
         anchors.fill: parent
+        spacing: 10
         ColumnLayout {
             Layout.alignment: Qt.AlignLeft
             Layout.preferredWidth: parent.width/4
             Layout.preferredHeight: parent.height
 
-            ComboBox {
-                id: selectROMComboBox
+            Item {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: parent.width/1.5
-                Layout.preferredHeight: parent.height/7
-                background: Rectangle {
-                    anchors.fill: parent
-                    color: "#00ff00"
+                Layout.preferredWidth: parent.width/1.1
+                Layout.preferredHeight: parent.height/4
+                z: 100
+                Text {
+                    id: text
+                    width: parent.width
+                    height: parent.height/3
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    text: "LOAD ROM"
+                    font.pointSize: 12
+                    font.bold: true
+                    color: "#ff0000"
                 }
 
-                textRole: 'text'
-                model: RomList{}
-
-                onActivated: {
-                    chip8.startProgram(model.get(currentIndex).path)
+                DropBox {
+                    id: selectROMComboBox
+                    width: parent.width
+                    height: 2*parent.height/3
+                    anchors.top: text.bottom
+                    items: RomList{}
+                    onItemChanged: {
+                        chip8.startProgram(items.get(selectedIndex).path)
+                    }
                 }
             }
+
+
 
             ButtonC {
                 id: pauseButton
                 Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: parent.width/1.5
+                Layout.preferredWidth: parent.width/1.1
                 Layout.preferredHeight: parent.height/7
                 name: (chip8.stage === Chip8Emulator.RunningStage)?"Pause":"Resume"
 
@@ -52,7 +66,7 @@ Rectangle {
             ButtonC {
                 id: restartButton
                 Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: parent.width/1.5
+                Layout.preferredWidth: parent.width/1.1
                 Layout.preferredHeight: parent.height/7
                 name: "Restart"
                 mouse.onClicked: {

@@ -46,7 +46,8 @@ Item {
 
             MouseArea {
                 anchors.fill: parent
-                onPressed: {
+                propagateComposedEvents: true
+                onPressed: (mouse) => {
                     parent.color = "#f700ff";
                     chip8.keyPressed = model.key;
                 }

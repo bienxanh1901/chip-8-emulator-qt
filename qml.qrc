@@ -5,5 +5,6 @@
         <file>ControlPanel.qml</file>
         <file>RomList.qml</file>
         <file>ButtonC.qml</file>
+        <file>DropBox.qml</file>
     </qresource>
 </RCC>
