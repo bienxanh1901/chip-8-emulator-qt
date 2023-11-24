@@ -36,7 +36,7 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE void startProgram(QString &rom);
+    Q_INVOKABLE void startProgram(QString rom);
     Q_INVOKABLE void pause();
     Q_INVOKABLE void resume();
     Q_INVOKABLE void restart();

@@ -144,7 +144,7 @@ void Chip8Emulator::setStage(Stages st)
  * @param rom path to ROM
  * @details start a program with specific ROM
  */
-void Chip8Emulator::startProgram(QString &rom)
+void Chip8Emulator::startProgram(QString rom)
 {
     this->pause();
     this->clear();
